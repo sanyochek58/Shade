@@ -1,0 +1,6 @@
+package com.vpn.auth.entity;
+
+public enum Role {
+    ROLE_USER,
+    ROLE_ADMIN
+}
