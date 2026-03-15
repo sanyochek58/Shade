@@ -1,4 +1,4 @@
-package com.vpn.auth.service;
+package com.vpn.auth.service.jwt;
 
 import com.vpn.auth.entity.User;
 import io.jsonwebtoken.Claims;
