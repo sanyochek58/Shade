@@ -1,0 +1,92 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-users-table
+      author: Alex_Buraev
+      changes:
+
+        - createTable:
+            tableName: users
+            remarks: Таблица пользователей
+            columns:
+
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  remarks: EMAIL - уникальный логин
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_users_email
+
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  remarks: BCrypt хэш пароля
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: role
+                  type: VARCHAR(255)
+                  defaultValue: ROLE_USER
+                  remarks: "Роль: ROLE_USER или ROLE_ADMIN"
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  remarks: Активен ли пользователь
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: telegram_chat_id
+                  type: BIGINT
+                  remarks: Telegram Chat ID для приёма Stars платежей
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+
+
+        - createIndex:
+            tableName: users
+            indexName: idx_users_email
+            columns:
+              - column:
+                  name: email
+
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: email
+                  value: admin@shade.com
+              - column:
+                  name: password
+                  value: "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQyCMc3L6eO0RL6G9HLi5cYoO"
+              - column:
+                  name: role
+                  value: ROLE_ADMIN
+              - column:
+                 name: active
+                 value: true
