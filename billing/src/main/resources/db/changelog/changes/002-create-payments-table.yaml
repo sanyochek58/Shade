@@ -1,0 +1,58 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-payments-table
+      author: Alex_Buraev
+      changes:
+
+        - createTable:
+            tableName: payments
+            remarks: Таблица платежей
+            columns:
+
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: amount
+                  type: BIGDECIMAL(10,2)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: currency
+                  type: VARCHAR(10)
+                  defaultValue: XTR
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: telegram_charge_id
+                  type: VARCHAR(255)
+
+              - column:
+                  name: status
+                  type: VARCHAR(25)
+                  defaultValue: PENDING
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: paid_at
+                  type: TIMESTAMP
+
+        - createIndex:
+            tableName: payments
+            indexName: idx_payments_user_id
+            columns:
+              - column:
+                  name: user_id
