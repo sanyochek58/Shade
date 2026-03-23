@@ -10,7 +10,7 @@ description = 'Auth-Service for VPN-app'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(25)
 	}
 }
 
@@ -42,10 +42,10 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 
 	// ==================== LIQUIBASE ====================
-	implementation 'org.liquibase:liquibase-core'
+	implementation 'org.springframework.boot:spring-boot-starter-liquibase'
 
 	// ==================== KAFKA ====================
-	implementation 'org.springframework.kafka:spring-kafka'
+	implementation 'org.springframework.boot:spring-boot-starter-kafka'
 
 	// ==================== VALIDATION ====================
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
