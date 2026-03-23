@@ -13,22 +13,18 @@ services:
       - "5432:5432"
     volumes:
       - postgres-auth-data:/var/lib/postgresql/data
-    networks:
-      - vpn-network
 
-    postgres-billing:
-      image: postgres:15-alpine
-      container_name: postgres-billing
-      environment:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_DB: paymentsdb
-      ports:
-        - "5433:5432"
-      volumes:
-        - postgres-billing-data:/var/lib/postgresql/data
-      networks:
-        - vpn-network
+  postgres-payments:
+    image: postgres:15-alpine
+    container_name: postgres-payments
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: paymentsdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-payments-data:/var/lib/postgresql/data
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -69,8 +65,4 @@ services:
 
 volumes:
   postgres-auth-data:
-  postgres-billing-data: 
-
-networks:
-  vpn-network:
-    driver: bridge
+  postgres-payments-data:
