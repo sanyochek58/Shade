@@ -1,58 +1,57 @@
 databaseChangeLog:
   - changeSet:
-    id: 001-create-subscriptions-table
-    author: Alex_Buraev
-    changes:
+      id: 001-create-subscriptions-table    # ← 6 пробелов (4 от changeSet)
+      author: Alex_Buraev
+      changes:
 
-      - createTable:
-          tableName: subscriptions
-          remarks: Таблица подписок
-          columns:
+        - createTable:
+            tableName: subscriptions
+            remarks: Таблица подписок
+            columns:
 
-            - column:
-                name: id
-                type: BIGSERIAL
-                constraints:
-                  primaryKey: true
-                  nullable: false
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
 
-            - column:
-                name: user_id
-                type: BIGINT
-                constraints:
-                  nullable: false
-                  unique: false
-                  uniqueConstraintName: uk_subscription_use_id
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_subscription_user_id
 
-            - column:
-                name: active
-                type: BOOLEAN
-                defaultValueBoolean: false
-                constraints:
-                  nullable: false
+              - column:
+                  name: active
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
 
-            - column:
-                name: expires_at
-                type: TIMESTAMP
+              - column:
+                  name: expires_at
+                  type: TIMESTAMP
 
-            - column:
-                name: created_at
-                type: TIMESTAMP
-                defaultValueComputed: NOW()
-                constraints:
-                  nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
 
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
 
-            - column:
-                name: updated_at
-                type: TIMESTAMP
-                defaultValueComputed: NOW()
-                constraints:
-                  nullable: false
-
-      - createIndex:
-        tableName: subscriptions
-        indexName: idx_subscriptions_user_id
-        columns:
-          - column:
-              name: user_id
+        - createIndex:              # ← внутри changes, 8 пробелов
+            tableName: subscriptions
+            indexName: idx_subscriptions_user_id
+            columns:
+              - column:
+                  name: user_id

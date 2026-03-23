@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface PaymentsRepository extends JpaRepository<Payment, Long> {
-    List<Payment> findByUserIdAndOrderCreatedAtDesc(Long userId);
+    List<Payment> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     Optional<Payment> findByTelegramChargeId(String telegramChargeId);
 

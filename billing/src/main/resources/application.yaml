@@ -6,7 +6,7 @@ spring:
     name: billing
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/paymentsdb}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/paymentsdb}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     hikari:
@@ -16,7 +16,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -33,11 +33,11 @@ spring:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 telegram:
-  bot-token: ${TELEGRAM_BOT_TOKEN}
-  bot-username: ${TELEGRAM_BOT_USERNAME}
+  bot-token: ${TELEGRAM_BOT_TOKEN:}
+  bot-username: ${TELEGRAM_BOT_USERNAME:}
 
 vpn:
-  price-stars: ${VPN_PRICE_STARS:299}
+  price-stars: ${VPN_PRICE_STARS:110}
 
 management:
   endpoints:
@@ -57,3 +57,5 @@ logging:
     com.vpn.billing: DEBUG
     org.springframework: INFO
     org.hibernate.SQL: DEBUG
+    liquibase: DEBUG
+    org.springframework.boot.autoconfigure.liquibase: DEBUG

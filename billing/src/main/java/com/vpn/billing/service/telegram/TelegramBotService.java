@@ -3,6 +3,7 @@ package com.vpn.billing.service.telegram;
 import com.vpn.billing.service.billing.BillingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@ConditionalOnExpression("T(org.springframework.util.StringUtils).hasText('${telegram.bot-token:}')")
 public class TelegramBotService implements SpringLongPollingBot {
 
     private final TelegramClient telegramClient;
@@ -73,7 +75,6 @@ public class TelegramBotService implements SpringLongPollingBot {
     }
 
     // Обработка обновлений от тг
-
     private void handleUpdate(Update update) {
         if (update.hasMessage()) {
             if(update.getMessage().hasText() && update.getMessage().getText().startsWith("/start")) {
@@ -94,7 +95,7 @@ public class TelegramBotService implements SpringLongPollingBot {
         Long chatId = update.getMessage().getChatId();
         String firstName = update.getMessage().getFrom().getFirstName();
 
-        sendMessage(chatId, "👋 Привет, " + firstName + "!\n\n" +
+        sendMessage(chatId, "Привет, " + firstName + "!\n\n" +
                 "Добро пожаловать в Shade VPN.\n" +
                 "Для оплаты подписки используй приложение.");
     }

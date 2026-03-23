@@ -24,7 +24,7 @@ databaseChangeLog:
 
               - column:
                   name: amount
-                  type: BIGDECIMAL(10,2)
+                  type: DECIMAL(10,2)
                   constraints:
                     nullable: false
 
@@ -43,6 +43,13 @@ databaseChangeLog:
                   name: status
                   type: VARCHAR(25)
                   defaultValue: PENDING
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at         # ← добавлено!
+                  type: TIMESTAMP
+                  defaultValueComputed: NOW()
                   constraints:
                     nullable: false
 

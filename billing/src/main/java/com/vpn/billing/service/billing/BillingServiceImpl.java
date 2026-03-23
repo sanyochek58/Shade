@@ -14,8 +14,11 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,7 +30,7 @@ public class BillingServiceImpl implements BillingService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final PaymentsRepository paymentsRepository;
-    private final TelegramBotService telegramBotService;
+    private final Optional<TelegramBotService> telegramBotService;
     private final PaymentEventProducer paymentEventProducer;
 
     @Value("${vpn.price-stars:110}")
@@ -39,13 +42,13 @@ public class BillingServiceImpl implements BillingService {
     public BillingServiceImpl(
             SubscriptionRepository subscriptionRepository,
             PaymentsRepository paymentsRepository,
-            TelegramBotService telegramBotService,
+            @Autowired(required = false) TelegramBotService telegramBotService,
             PaymentEventProducer paymentEventProducer,
             MeterRegistry meterRegistry
     ){
         this.subscriptionRepository = subscriptionRepository;
         this.paymentsRepository = paymentsRepository;
-        this.telegramBotService = telegramBotService;
+        this.telegramBotService = Optional.ofNullable(telegramBotService);
         this.paymentEventProducer = paymentEventProducer;
 
         this.paymentSuccessCounter = Counter.builder("billing.payments.success.total")
@@ -79,7 +82,9 @@ public class BillingServiceImpl implements BillingService {
                 .build();
         paymentsRepository.save(payment);
 
-        String payUrl = telegramBotService.createInvoiceLink(userId, priceStars);
+        String payUrl = telegramBotService
+                .orElseThrow(() -> new BillingException("Telegram bot не настроен. Укажите TELEGRAM_BOT_TOKEN."))
+                .createInvoiceLink(userId, priceStars);
         paymentInitiatedCounter.increment();
         log.info("Платёж создан: userId={}, stars={}", userId, priceStars);
 
