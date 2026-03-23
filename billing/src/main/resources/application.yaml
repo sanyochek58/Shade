@@ -37,7 +37,7 @@ telegram:
   bot-username: ${TELEGRAM_BOT_USERNAME:}
 
 vpn:
-  price-stars: ${VPN_PRICE_STARS:110}
+  price-stars: ${VPN_PRICE_STARS:150}
 
 management:
   endpoints:
@@ -59,3 +59,5 @@ logging:
     org.hibernate.SQL: DEBUG
     liquibase: DEBUG
     org.springframework.boot.autoconfigure.liquibase: DEBUG
+    org.telegram: DEBUG
+    okhttp3: DEBUG

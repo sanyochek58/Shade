@@ -39,7 +39,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-liquibase'
 
 	// ==================== KAFKA ====================
-	implementation 'org.springframework.kafka:spring-kafka'
+	implementation 'org.springframework.boot:spring-boot-starter-kafka'
 
 	// ==================== TELEGRAM BOT ====================
 	implementation 'org.telegram:telegrambots-springboot-longpolling-starter:7.2.1'

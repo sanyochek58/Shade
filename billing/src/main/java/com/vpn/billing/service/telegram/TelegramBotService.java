@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
 import org.telegram.telegrambots.longpolling.starter.SpringLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.invoices.CreateInvoiceLink;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.payments.SuccessfulPayment;
@@ -17,6 +17,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -25,6 +26,7 @@ public class TelegramBotService implements SpringLongPollingBot {
 
     private final TelegramClient telegramClient;
     private final BillingService billingService;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${telegram.bot-token}")
     private String botToken;
@@ -50,28 +52,30 @@ public class TelegramBotService implements SpringLongPollingBot {
     }
 
 
-    // Создание счёта на оплату
+    // Создание счёта на оплату — прямой HTTP-вызов т.к. telegrambots 7.2.1 не допускает пустой providerToken (баг для XTR)
+    @SuppressWarnings("unchecked")
     public String createInvoiceLink(Long userId, Integer stars) {
-        try{
-            CreateInvoiceLink invoiceLink = CreateInvoiceLink.builder()
-                    .title("VPN подписка - 30 дней")
-                    .description("Безлимитный доступ + раздельныое туннелирование")
-                    .payload("vpn_sub_" + userId)
-                    .currency("XTR")
-                    .prices(List.of(
-                            new org.telegram.telegrambots.meta.api.objects.payments.LabeledPrice("VPN 30 дней", stars)
-                    ))
-                    .providerToken("")
-                    .build();
+        String url = "https://api.telegram.org/bot" + botToken + "/createInvoiceLink";
 
-            String link = telegramClient.execute(invoiceLink);
+        Map<String, Object> body = Map.of(
+                "title", "VPN подписка - 30 дней",
+                "description", "Безлимитный доступ + раздельное туннелирование",
+                "payload", "vpn_sub_" + userId,
+                "currency", "XTR",
+                "provider_token", "",
+                "prices", List.of(Map.of("label", "VPN 30 дней", "amount", stars))
+        );
 
-            log.info("Создана ссылка на оплату для userId={}", userId);
-            return link;
-        } catch (TelegramApiException e) {
-            log.error("Ошибка создания инвойса: {}", e.getMessage());
-            throw new RuntimeException("Не удалось создать платёж", e);
+        Map<String, Object> response = restTemplate.postForObject(url, body, Map.class);
+
+        if (response == null || !Boolean.TRUE.equals(response.get("ok"))) {
+            log.error("Telegram API вернул ошибку: {}", response);
+            throw new RuntimeException("Не удалось создать платёж: " + response);
         }
+
+        String link = (String) response.get("result");
+        log.info("Создана ссылка на оплату для userId={}", userId);
+        return link;
     }
 
     // Обработка обновлений от тг
