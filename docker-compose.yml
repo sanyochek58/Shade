@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
 
+  # Базы данных
   postgres-auth:
     image: postgres:15-alpine
     container_name: postgres-auth
@@ -13,6 +14,13 @@ services:
       - "5432:5432"
     volumes:
       - postgres-auth-data:/var/lib/postgresql/data
+    networks:
+      - vpn-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d authdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres-payments:
     image: postgres:15-alpine
@@ -25,6 +33,13 @@ services:
       - "5433:5432"
     volumes:
       - postgres-payments-data:/var/lib/postgresql/data
+    networks:
+      - vpn-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d paymentsdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres-vpn-configs:
     image: postgres:15-alpine
@@ -37,32 +52,53 @@ services:
       - "5434:5432"
     volumes:
       - postgres-vpn-configs-data:/var/lib/postgresql/data
+    networks:
+      - vpn-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d vpnconfigsdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # Kafka и Zookeeper
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - vpn-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     ports:
       - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    networks:
+      - vpn-network
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -74,8 +110,148 @@ services:
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    networks:
+      - vpn-network
 
+  
+  # Микросервисы
+  auth-service:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+    container_name: auth-service
+    expose:
+      - "8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/authdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - vpn-network
+    restart: unless-stopped
+
+  billing-service:
+    build:
+      context: ./billing
+      dockerfile: Dockerfile
+    container_name: billing-service
+    expose:
+      - "8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-payments:5432/paymentsdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME}
+      VPN_PRICE_STARS: ${VPN_PRICE_STARS:-299}
+    depends_on:
+      postgres-payments:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - vpn-network
+    restart: unless-stopped
+
+
+  vpn-service:
+    build:
+      context: ./vpn-conf
+      dockerfile: Dockerfile
+    container_name: vpn-service
+    expose:
+      - "8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-vpn-configs:5432/vpnconfigsdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
+      VPS_HOST: ${VPS_HOST}
+      VPS_USER: ${VPS_USER:-root}
+      VPS_PORT: ${VPS_PORT:-22}
+      VPS_KEY_PATH: /app/ssh/shade_vpn
+      VPS_PUBLIC_KEY: ${VPS_PUBLIC_KEY}
+      VPS_XRAY_PORT: ${VPS_XRAY_PORT:-443}
+      VPS_SHORT_ID: ${VPS_SHORT_ID:-}
+    volumes:
+      - ~/.ssh/shade_vpn:/app/ssh/shade_vpn:ro
+    depends_on:
+      postgres-vpn-configs:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - vpn-network
+    restart: unless-stopped
+ 
+  api-gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_SERVICE_URL: http://auth-service:8081
+      BILLING_SERVICE_URL: http://billing-service:8082
+      VPN_SERVICE_URL: http://vpn-service:8083
+    depends_on:
+      - auth-service
+      - billing-service
+      - vpn-service
+    networks:
+      - vpn-network
+    restart: unless-stopped
+
+  # Мониторинг
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - vpn-network
+    restart: unless-stopped
+ 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - vpn-network
+    restart: unless-stopped
+
+
+#VOLUMES И NETWORKS
 volumes:
   postgres-auth-data:
   postgres-payments-data:
   postgres-vpn-configs-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  vpn-network:
+    driver: bridge

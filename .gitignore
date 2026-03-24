@@ -1,0 +1,55 @@
+# ==================== GRADLE ====================
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ==================== INTELLIJ IDEA ====================
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# ==================== VSCODE ====================
+.vscode/
+
+# ==================== OS ====================
+.DS_Store
+Thumbs.db
+
+# ==================== ENV / SECRETS ====================
+.env
+*.env
+.env.*
+!.env.example
+
+# ==================== SSH KEYS ====================
+*.pem
+*.key
+id_rsa
+id_ed25519
+shade_vpn
+
+# ==================== LOGS ====================
+*.log
+logs/
+
+# ==================== DOCKER ====================
+docker-compose.override.yml
+
+# ==================== JAVA ====================
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+target/
+
+# ==================== NETBEANS ====================
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/

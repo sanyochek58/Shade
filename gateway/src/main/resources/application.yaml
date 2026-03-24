@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway
+
+jwt:
+  secret: ${JWT_SECRET:dGhpcyBpcyBhIHZlcnkgbG9uZyBzZWNyZXQga2V5IGZvciBqd3QgdG9rZW4gZ2VuZXJhdGlvbiE=}
+
+services:
+  auth-url: ${AUTH_SERVICE_URL:http://localhost:8081}
+  billing-url: ${BILLING_SERVICE_URL:http://localhost:8082}
+  vpn-url: ${VPN_SERVICE_URL:http://localhost:8083}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus, info
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    com.example.gateway: DEBUG
+    org.springframework.cloud.gateway: INFO
