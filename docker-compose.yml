@@ -26,6 +26,18 @@ services:
     volumes:
       - postgres-payments-data:/var/lib/postgresql/data
 
+  postgres-vpn-configs:
+    image: postgres:15-alpine
+    container_name: postgres-vpn-configs
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: vpnconfigsdb
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-vpn-configs-data:/var/lib/postgresql/data
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
