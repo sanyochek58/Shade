@@ -18,7 +18,7 @@ public class PaymentEventConsumer {
     private final VpnService vpnService;
 
     @KafkaListener(
-            topics = "payments-event",
+            topics = "payments-events",
             groupId = "vpn-service-group"
     )
     public void handlePaymentEvent(String message) {

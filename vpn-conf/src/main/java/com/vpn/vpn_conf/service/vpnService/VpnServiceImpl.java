@@ -24,7 +24,7 @@ public class VpnServiceImpl implements VpnService {
     @Value("${vps.host}")
     private String host;
 
-    @Value("${vps,xray-port:443}")
+    @Value("${vps.xray-port:443}")
     private int port;
 
     @Value("${vps.public-key}")
@@ -49,21 +49,25 @@ public class VpnServiceImpl implements VpnService {
         }
 
         // Генерируем новый UUID для XRay
-        String uuid =  UUID.randomUUID().toString();
-
-        // Добавляем пользователя в XRay на VPS
-        sshService.addUserToXray(uuid);
+        String uuid = UUID.randomUUID().toString();
 
         // Генерируем vless:// ссылку
         String vlessLink = buildVlessLink(uuid);
 
+        // Сначала сохраняем в БД (active=false), потом идём в XRay
         VpnConfig config = VpnConfig.builder()
                 .userId(userId)
                 .uuid(uuid)
                 .vlessLink(vlessLink)
-                .active(true)
+                .active(false)
                 .build();
 
+        vpnConfigRepository.save(config);
+
+        // Добавляем пользователя в XRay — если упадёт, транзакция откатит запись в БД
+        sshService.addUserToXray(uuid);
+
+        config.setActive(true);
         vpnConfigRepository.save(config);
         log.info("VPN конфиг создан для userId={}", userId);
     }
