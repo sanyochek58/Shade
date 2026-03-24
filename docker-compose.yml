@@ -78,3 +78,4 @@ services:
 volumes:
   postgres-auth-data:
   postgres-payments-data:
+  postgres-vpn-configs-data:
