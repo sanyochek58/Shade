@@ -30,11 +30,11 @@ public class VpnConfig {
 
     // Готовая vless:// ссылка для Android
     @Column(name = "vless_link", nullable = false, length = 1000)
-    private String vlLessLink;
+    private String vlessLink;
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean vlLess = false;
+    private Boolean active = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

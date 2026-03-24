@@ -57,6 +57,12 @@ dependencies {
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// ==================== JSON ====================
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+	// ==================== SSH (JSch) ====================
+	implementation 'com.github.mwiede:jsch:0.2.17'
 }
 
 tasks.named('test') {
