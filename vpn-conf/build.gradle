@@ -10,7 +10,7 @@ description = 'Config-Service for VPN-app'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(25)
 	}
 }
 
@@ -25,19 +25,37 @@ repositories {
 }
 
 dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+	// ==================== WEB ====================
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// ==================== DATABASE ====================
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-kafka'
-	implementation 'org.springframework.boot:spring-boot-starter-liquibase'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
-	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
+
+	// ==================== LIQUIBASE ====================
+	implementation 'org.springframework.boot:spring-boot-starter-liquibase'
+
+	// ==================== KAFKA ====================
+	implementation 'org.springframework.boot:spring-boot-starter-kafka'
+
+	// ==================== VALIDATION ====================
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// ==================== MONITORING ====================
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+	// ==================== LOMBOK ====================
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-kafka-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-liquibase-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+
+	// ==================== TEST ====================
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

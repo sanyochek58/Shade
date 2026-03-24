@@ -1,0 +1,68 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-vpn-configs-table
+      author: Alex_Buraev
+      changes:
+
+        - createTable:
+
+            tableName: vpn_configs
+            remarks: Таблица с конфигами VPN подключений
+
+            columns:
+              - column:
+                  name: id
+                  type: SERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_vpn_configs_user_id
+
+              - column:
+                  name: uuid
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_vpn_configs_uuid
+
+              - column:
+                  name: vless_link
+                  type: VARCHAR(1000)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: active
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+
+        - createIndex:
+            tableName: vpn_configs
+            indexName: idx_vpn_configs_user_id
+            columns:
+              - column:
+                  name: user_id
