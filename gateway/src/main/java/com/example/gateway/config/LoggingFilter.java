@@ -1,29 +1,29 @@
 package com.example.gateway.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
-@Configuration
+@Component
+@Order(-1)
 @Slf4j
-public class LoggingFilter {
+public class LoggingFilter implements WebFilter {
 
-    @Bean
-    @Order(-1)
-    public GlobalFilter loggingFilter() {
-        return (exchange, chain) -> {
-            String method = exchange.getRequest().getMethod().name();
-            String path = exchange.getRequest().getPath().value();
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        String method = exchange.getRequest().getMethod().name();
+        String path = exchange.getRequest().getPath().value();
 
-            log.info("→ {} {}", method, path);
+        log.info("→ {} {}", method, path);
 
-            return chain.filter(exchange).then(Mono.fromRunnable(() -> {
-                int status = exchange.getResponse().getStatusCode().value();
-                log.info("← {} {} [{}]", method, path, status);
-            }));
-        };
+        return chain.filter(exchange).then(Mono.fromRunnable(() -> {
+            int status = exchange.getResponse().getStatusCode() != null
+                    ? exchange.getResponse().getStatusCode().value() : 0;
+            log.info("← {} {} [{}]", method, path, status);
+        }));
     }
 }

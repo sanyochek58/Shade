@@ -25,4 +25,3 @@ management:
 logging:
   level:
     com.example.gateway: DEBUG
-    org.springframework.cloud.gateway: INFO

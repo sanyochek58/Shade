@@ -1,0 +1,268 @@
+{
+  "title": "Shade VPN Monitor",
+  "uid": "shade-vpn",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "15s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Регистрации (в сек)",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "blue", "value": null }] },
+          "unit": "reqps"
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus" },
+        "expr": "rate(auth_registrations_total[5m])",
+        "legendFormat": "Регистрации"
+      }]
+    },
+    {
+      "id": 2,
+      "title": "Успешные логины (в сек)",
+      "type": "stat",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "green", "value": null }] },
+          "unit": "reqps"
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus" },
+        "expr": "rate(auth_logins_success_total[5m])",
+        "legendFormat": "Успешные логины"
+      }]
+    },
+    {
+      "id": 3,
+      "title": "Неудачные логины (в сек)",
+      "type": "stat",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 0.01 }
+            ]
+          },
+          "unit": "reqps"
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus" },
+        "expr": "rate(auth_logins_failed_total[5m])",
+        "legendFormat": "Неудачные логины"
+      }]
+    },
+    {
+      "id": 4,
+      "title": "Платежи инициировано (в сек)",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "blue", "value": null }] },
+          "unit": "reqps"
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus" },
+        "expr": "rate(billing_payments_initiated_total[5m])",
+        "legendFormat": "Инициировано"
+      }]
+    },
+    {
+      "id": 5,
+      "title": "Успешные платежи (в сек)",
+      "type": "stat",
+      "gridPos": { "x": 16, "y": 0, "w": 4, "h": 4 },
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "green", "value": null }] },
+          "unit": "reqps"
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus" },
+        "expr": "rate(billing_payments_success_total[5m])",
+        "legendFormat": "Успешные"
+      }]
+    },
+    {
+      "id": 6,
+      "title": "Конверсия платежей %",
+      "type": "stat",
+      "gridPos": { "x": 20, "y": 0, "w": 4, "h": 4 },
+      "options": { "colorMode": "background", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "green", "value": 80 }
+            ]
+          },
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus" },
+        "expr": "rate(billing_payments_success_total[5m]) / rate(billing_payments_initiated_total[5m]) * 100",
+        "legendFormat": "Конверсия"
+      }]
+    },
+    {
+      "id": 7,
+      "title": "Auth — логины и регистрации",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "fieldConfig": {
+        "defaults": { "unit": "reqps", "custom": { "lineWidth": 2 } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Неудачные" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }] },
+          { "matcher": { "id": "byName", "options": "Успешные" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }] },
+          { "matcher": { "id": "byName", "options": "Регистрации" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }] }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus" },
+          "expr": "rate(auth_logins_success_total[5m])",
+          "legendFormat": "Успешные"
+        },
+        {
+          "datasource": { "type": "prometheus" },
+          "expr": "rate(auth_logins_failed_total[5m])",
+          "legendFormat": "Неудачные"
+        },
+        {
+          "datasource": { "type": "prometheus" },
+          "expr": "rate(auth_registrations_total[5m])",
+          "legendFormat": "Регистрации"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Billing — платежи",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "fieldConfig": {
+        "defaults": { "unit": "reqps", "custom": { "lineWidth": 2 } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Успешные" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }] },
+          { "matcher": { "id": "byName", "options": "Инициировано" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }] }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus" },
+          "expr": "rate(billing_payments_initiated_total[5m])",
+          "legendFormat": "Инициировано"
+        },
+        {
+          "datasource": { "type": "prometheus" },
+          "expr": "rate(billing_payments_success_total[5m])",
+          "legendFormat": "Успешные"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "HTTP запросы через Gateway (в сек)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "fieldConfig": {
+        "defaults": { "unit": "reqps", "custom": { "lineWidth": 2 } }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus" },
+        "expr": "rate(http_server_requests_seconds_count{job=\"api-gateway\"}[5m])",
+        "legendFormat": "{{method}} {{uri}} — {{status}}"
+      }]
+    },
+    {
+      "id": 10,
+      "title": "Latency Gateway P95 (мс)",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "fieldConfig": {
+        "defaults": { "unit": "ms", "custom": { "lineWidth": 2 } }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus" },
+        "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{job=\"api-gateway\"}[5m])) * 1000",
+        "legendFormat": "P95 {{uri}}"
+      }]
+    },
+    {
+      "id": 11,
+      "title": "JVM Память (heap)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 20, "w": 12, "h": 8 },
+      "fieldConfig": {
+        "defaults": { "unit": "bytes", "custom": { "lineWidth": 2 } }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus" },
+          "expr": "jvm_memory_used_bytes{area=\"heap\"}",
+          "legendFormat": "{{application}} heap used"
+        },
+        {
+          "datasource": { "type": "prometheus" },
+          "expr": "jvm_memory_max_bytes{area=\"heap\"}",
+          "legendFormat": "{{application}} heap max"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "CPU Usage",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 20, "w": 12, "h": 8 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "custom": { "lineWidth": 2 },
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.5 },
+              { "color": "red", "value": 0.8 }
+            ]
+          }
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "prometheus" },
+        "expr": "process_cpu_usage",
+        "legendFormat": "{{application}}"
+      }]
+    }
+  ]
+}
