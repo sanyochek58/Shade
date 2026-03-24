@@ -18,14 +18,12 @@ public class PaymentEventProducer {
 
     private static final String TOPIC = "payments-events";
 
-    public void sendPaymentSuccess(Long userId, String email) {
+    public void sendPaymentSuccess(Long userId) {
         try {
             Map<String, Object> event = Map.of(
                     "type", "PAYMENT_SUCCESS",
                     "userId", userId,
-                    "email", email,
                     "timestamp", System.currentTimeMillis()
-
             );
             String message = objectMapper.writeValueAsString(event);
             kafkaTemplate.send(TOPIC, userId.toString(), message);
@@ -39,7 +37,7 @@ public class PaymentEventProducer {
     public void sendSubscriptionExpired(Long userId) {
         try {
             Map<String, Object> event = Map.of(
-                    "type", "PAYMENT_SUCCESS",
+                    "type", "SUBSCRIPTION_EXPIRED",
                     "userId", userId,
                     "timestamp", System.currentTimeMillis()
             );

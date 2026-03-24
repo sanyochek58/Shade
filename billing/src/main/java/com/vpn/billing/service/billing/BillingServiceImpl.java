@@ -117,7 +117,7 @@ public class BillingServiceImpl implements BillingService {
         subscription.setExpiresAt(base.plusDays(30));
         subscriptionRepository.save(subscription);
 
-        paymentEventProducer.sendPaymentSuccess(userId, null);
+        paymentEventProducer.sendPaymentSuccess(userId);
 
         paymentSuccessCounter.increment();
         log.info("🎉 Подписка активна до: {}", subscription.getExpiresAt());
