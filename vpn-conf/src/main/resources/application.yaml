@@ -6,7 +6,7 @@ spring:
     name: vpn-conf
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5434/vpn_configdb}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5434/vpnconfigsdb}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     hikari:
@@ -30,14 +30,14 @@ spring:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
 
 vps:
-  host:
-  user:
-  port:
-  key-path:
-  xray-confg:
-  xray-port:
-  public-key:
-  short-id:
+  host: ${VPS_HOST:80.76.34.9}
+  user: ${VPS_USER:root}
+  port: ${VPS_PORT:22}
+  key-path: ${VPS_KEY_PATH:/home/alexandr/.ssh/shade_vpn}
+  xray-config: ${VPS_XRAY_CONFIG:/usr/local/etc/xray/config.json}
+  xray-port: ${VPS_XRAY_PORT:443}
+  public-key: ${VPS_PUBLIC_KEY:5nPsHtj4eD4Qd2pdjx9Wp_laWWHDcD50F8Jq8i97gno}
+  short-id: ${VPS_SHORT_ID:}
 
 management:
   endpoints:
@@ -54,7 +54,7 @@ management:
 
 logging:
   level:
-    com.vpn.billing: DEBUG
+    com.vpn.vpn_conf: DEBUG
     org.springframework: INFO
     org.hibernate.SQL: DEBUG
     liquibase: DEBUG

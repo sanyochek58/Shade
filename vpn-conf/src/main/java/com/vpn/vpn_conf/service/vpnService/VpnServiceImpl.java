@@ -24,7 +24,7 @@ public class VpnServiceImpl implements VpnService {
     @Value("${vps.host}")
     private String host;
 
-    @Value("${vps,xray-port:433}")
+    @Value("${vps,xray-port:443}")
     private int port;
 
     @Value("${vps.public-key}")
